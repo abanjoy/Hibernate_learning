@@ -1,0 +1,114 @@
+For Hibernate Project
+	->Entity class
+	-> Pom.xml
+	-> hibernate.cfg.xml
+	-> Main.java
+	-> HibernateDAO.java (interface)
+	-> HibernateDAOImpl.java
+	-> Database Table
+
+CRUD Operations
+	Today we have make a change like, making Id's as Autoincrement.Hibernate itself gives the value.
+	-> @GeneratedValue(strategy = GenerationType.AUTO)
+
+		AUTO,IDENTITY,SEQUENCE,TABLE
+
+	Configuration config = new Configuration().configure("hibernate.cfg.xml").addAnnotatedClass(Student.class);
+		Session session = config.buildSessionFactory().openSession();
+		Transaction t = session.beginTransaction();
+		
+		Student s = new Student("Alan","alan@gmail.com","Alapuzha",588634);
+		
+		session.persist(s);
+		
+		t.commit();
+		System.out.println("Successfull");
+
+	While running this will give error like 
+		ERROR: could not read a hi value
+		java.sql.SQLSyntaxErrorException: Table 'hibernatepractise.students_seq' doesn't exist
+		at com.mysql.cj.jdbc.exceptions.SQLError.createSQLException(SQLError.java:121)
+
+	The hibernate wants the table "students_seq" but we created students.
+	To avoid this problem, we allow hibernate to create table by its own choice and name by adding by tags
+	in the hibernate.cfg.xml ( hibernate to DDL proprty)
+
+		<property name="hbm2ddl.auto">update</property>
+
+	Now onwards the hibernate itself will start to create table by its own.
+
+	Now the error will be solved
+
+<property name="hbm2ddl.auto">update</property> this property will allow hibernate to create its own table by itself.
+
+File Structure
+	Project name
+		src/main/java -> folder
+			com.hib.entity -> package
+				Student.java 
+			com.hib.main -> package
+				Main.java
+			com.hib.hibernateManager -> package
+				com.hib.hibernateManager.StudentDAO
+				com.hib.hibernateManager.StudentDAOimpl
+
+				we can also include Session creation as a class
+
+		src/main/resources
+			hibernate.cfg.xml
+
+Insert to Db
+	-> persist()
+	-> sava()
+Fetch all students
+	Query q = session.createQuery("from Student");  -> HQL
+	
+		Query q = session.createQuery("from Student");  --> from Student (Class) in HQL
+		List<Student> list = q.list();
+		
+		for(int i=0;i<list.size();i++) {
+			System.out.println(list.get(i));
+		}
+
+	Also do by using Criteria Query from hibernate 5+
+
+Fetch Specific Student
+	Student s = session.get(Student.class, sid);  get ( class_file, primary_key)
+	
+
+		Student s = session.get(Student.class, sid);
+		String Sname = "Jinson";
+		System.out.println(s);
+		Query q = session.createQuery("from Student where name = :name").setParameter( "name",Sname);
+		
+		System.out.println(q.list().get(0));
+
+Delete Student
+	public void deleteStudent(int sid) {
+		// TODO Auto-generated method stub
+		session.beginTransaction();
+		
+		Student s = fetchStudent(sid);
+		try {
+			session.delete(s);
+			session.getTransaction().commit();
+			System.out.println("Delete Successfull");
+		} catch (Exception e) {
+			// TODO: handle exception
+			System.out.println(e.getMessage());
+		}
+		System.out.println(s);
+		
+		
+	}
+
+Update Student
+		Student s = session.get(Student.class, sid);
+		if(s != null) {
+			s.setEmail(email);
+			session.beginTransaction();
+			session.persist(s);
+			session.getTransaction().commit();
+			
+		}
+	
