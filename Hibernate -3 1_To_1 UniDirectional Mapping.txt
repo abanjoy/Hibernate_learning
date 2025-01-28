@@ -1,0 +1,154 @@
+There are different types of mapping, They are 
+	-> 1:1
+	-> 1:M
+	-> M:1
+	-> M:N
+We can do this mapping in hibernate
+Normally we use mapping by using foreign key in sql
+
+One To One Mapping ( Unidirectional )
+	Here we are doing 1:1 Mapping by Student table and Student_detail table
+	Entity class
+		-> Student
+			- sid
+			- name
+			- email
+			- studentDetails
+		-> Student_Detail
+			- sdId
+			- mobile
+			- address
+			- pincode
+
+	Mapping
+		In sql we do the mapping by using referential intergrity or composite primary key, for that purpose we need
+		to add a foreign key column so the datatype is integer.
+		But in hibernate every thing is treated as objects.So here we craeted datatype of mapping column is
+		class name of the table
+		Also need to create settters and getters for that newly created column.
+
+		That means that column in Student table represnts an object of student details
+
+		Mappin in hibernate
+		
+			@OneToOne(cascade = cascadeType.ALL )
+			@JoinColumn(name="studentdetailId")  --> joining column name
+			private StudentDetails studentDetails;
+
+			If we give only @OneToOne that time it just represent the table, to mention whatt all type
+			of operations that are possible to do, it will by using cascade or other keywords
+
+			So when we insert Student data,automatically student detail will also get inserted.
+
+Steps
+	-> Create Entity classes( Student ,StduentDetails )
+@Entity
+@Table(name="student")
+public class Student {
+	@Id
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	@Column(name="sid")
+	private int sid;
+	@Column(name="name")
+	private String name;
+	@Column(name="email")
+	private String email;
+}
+
+
+@Entity
+@Table(name="studentdetails")
+public class StudentDetails {
+	@Id
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	@Column(name="sdid")
+	private int sdId;
+	@Column(name="mobile")
+	private long mobile;
+	@Column(name="address")
+	private String address;
+	@Column(name="pincode")
+	private int pincode;
+}
+
+
+	
+
+	-> add mapping columns and annotations
+
+	-> If we creating a parameterised constructor it is important to create a null parameterised constructor
+	-> add joining column annotations to the mapping column
+		public class Student {
+			@Id
+			@GeneratedValue(strategy = GenerationType.AUTO)
+			@Column(name="sid")
+			private int sid;
+			@Column(name="name")
+			private String name;
+			@Column(name="email")
+			private String email;
+	
+			@OneToOne(cascade = CascadeType.ALL)
+			@JoinColumn(name="studentdetails")
+			private StudentDetails studentDetails;
+
+	-> create setters and getters of that column
+	-> Create hibernate.cfg.xml file
+		
+		<?xml version="1.0" encoding="UTF-8"?>
+		<!DOCTYPE hibernate-configuration PUBLIC
+        	"-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+        	"http://hibernate.org/dtd/hibernate-configuration-3.0.dtd">
+		<hibernate-configuration>
+    			<session-factory>
+        			<property name="hibernate.connection.driver_class">com.mysql.cj.jdbc.Driver</property>
+        			<property name="hibernate.connection.url">jdbc:mysql://localhost:3306/hibernatepractise</property>
+        			<property name="hibernate.connection.username">root</property>
+        			<property name="hibernate.connection.password">123456</property>
+        			<property name="hibernate.connection.pool_size">3</property>
+        			<property name="hibernate.show_sql">true</property>
+        			<property name="format_sql">true</property>
+        			<property name="hibernate.dialect">org.hibernate.dialect.MySQLDialect</property>
+        			<property name="hbm2ddl.auto">update</property>
+
+    			</session-factory>
+		</hibernate-configuration>
+
+
+	-> Add both Entity classes in the addAnnotatedClass() method
+		if failed to add student details class in annottatedclass method, that time it show an error
+		unknown entity com.tap.entity.studentdetails
+	-> Session creation
+	-> created Entity objects of both classes Student & StudentDetails	
+	-> add Student detail object to Student via setters methods
+	-> do persist() method to insert the object
+
+
+		public static void main(String[] args) {
+		// TODO Auto-generated method stub
+		
+		Configuration config = new Configuration().configure("hibernate.cfg.xml").addAnnotatedClass(Student.class)
+				.addAnnotatedClass(StudentDetails.class);
+		
+		Session session = config.buildSessionFactory().openSession();
+		
+		session.beginTransaction();
+		 Student s= new Student( "Alan", "alan@gmail.com");
+		 StudentDetails sd =new StudentDetails(9089786534L,"Alapuzha",588623);
+		 
+		 s.setStudentDetails(sd);
+		 
+		 session.persist(s);
+		 
+		 session.getTransaction().commit();
+		 
+
+	}
+
+
+So the hibernate first insert into student details table and then only it inserted to Student table
+
+In Uni directional mapping 
+	we can insert data via STudent class only, not by StudentDetails
+But in Bi Directional mapping we can insert data by, using STudent or StudentDetails
+			
