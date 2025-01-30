@@ -1,0 +1,32 @@
+Lets assume 2 tables
+	-> Customer
+	-> CustomerInfo
+
+If Customer ---> CustomerInfo(mapped to),Then it is called as Unidirectional Mapping
+
+Customer Entity Class
+	@OneToOne(cascade="cascadeType.ALL")
+	@JoinColumn(name="")
+	private CustomerInfo customerInfo;
+
+If Customer --> CustomerInfo and CustomerInfo ---> Customer. This is called as Bidirectional Mapping
+
+Customer Entity Class
+	@oneToOne
+	@JoinColumn(name="customerInfo", referencedColumnName = "ciid")
+	private CustomerInfo customerInfo;
+
+CustomerInfo Entity Class
+	@OneToOne(mappedBy = "customerInfo",cascade = CascadeType.ALL)
+	private Customer customer;
+
+
+For the completion of bidirectional mapping
+	we need to set both classes with each other
+
+	Customer c = new Customer("Akhil",9658741478);
+	CustomerInfo ci = new CustomerInfo("akhil@gmail.com","palakkad",450.00);
+
+	c.setCustomerInfo(ci);
+	ci.setCustomer(c);
+	session.persist(c);
